@@ -246,7 +246,7 @@ public final class Var
   public synchronized long getRev() {
     return rev;
   }
-  
+
   public synchronized void resetRev() {
     rev = nsRev();
   }
@@ -256,10 +256,10 @@ public final class Var
   }
 
   final public Object deref() {
-    if(isStale()) {
+    if (isStale()) {
       RT.errPrintWriter().println(
-        String.format("Warning: derefing stale var %s (%s:%d:%d)",
-          toString(), RT.SOURCE_PATH.deref(), RT.LINE.deref(), RT.COLUMN.deref()));
+        String.format("Warning: derefing stale Var %s %s",
+                      toString(), RT.getPos()));
     }
     TBox b = getThreadBinding();
     if (b != null) {
