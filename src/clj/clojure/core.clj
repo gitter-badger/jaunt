@@ -5677,9 +5677,9 @@
   else expr is unevaluated"
   {:added "1.0"}
   [name expr]
-  `(let [v# (def ~name)]
+  `(let [v# (def ~(with-meta name (assoc (meta name) :once true)))]
      (when-not (.hasRoot v#)
-       (def ~name ~expr))))
+       (.bindRoot v# ~expr))))
 
 ;;;;;;;;;;; require/use/load, contributed by Stephen C. Gilardi ;;;;;;;;;;;;;;;;;;
 
