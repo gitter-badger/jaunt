@@ -5651,17 +5651,20 @@
         ;ns-effect (clojure.core/in-ns name)
         name-metadata (meta name)]
     `(do
+       (let [n# (clojure.lang.Namespace/find '~name)]
+         (if (and n# (.isModule n#))
+           (.reset n#)))
        (clojure.core/in-ns '~name)
        ~@(when name-metadata
            `((.resetMeta (clojure.lang.Namespace/find '~name) ~name-metadata)))
        (with-loading-context
-        ~@(when gen-class-call (list gen-class-call))
-        ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
-            `((clojure.core/refer '~'clojure.core)))
-        ~@(map process-reference references))
-        (if (.equals '~name 'clojure.core) 
-          nil
-          (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))))
+         ~@(when gen-class-call (list gen-class-call))
+         ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
+             `((clojure.core/refer '~'clojure.core)))
+         ~@(map process-reference references))
+       (if (.equals '~name 'clojure.core)
+         nil
+         (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))))
 
 (defmacro refer-clojure
   "Same as (refer 'clojure.core <filters>)"
