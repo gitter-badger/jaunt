@@ -256,11 +256,6 @@ public final class Var
   }
 
   final public Object deref() {
-    if (isStale()) {
-      RT.errPrintWriter().println(
-        String.format("Warning: derefing stale Var %s %s",
-                      toString(), RT.getPos()));
-    }
     TBox b = getThreadBinding();
     if (b != null) {
       return b.val;
