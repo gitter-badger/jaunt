@@ -114,10 +114,13 @@
                (let [pstr (pr-str x)]
                  (and (.endsWith pstr s)
                       (.startsWith pstr "^")
-                      (.contains pstr (pr-str (meta x))))))
-       #'pr-str  "#'clojure.core/pr-str"
-       #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
-       #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+                      (.contains pstr
+                                 (pr-str (dissoc (meta x)
+                                                 :clojure.core.compiler/uses
+                                                 :clojure.core.compiler/reaches))))))
+    #'pr-str  "#'clojure.core/pr-str"
+    #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
+    #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
 
 (defn ^:private ednize-stack-trace-element
   [^StackTraceElement ste]
