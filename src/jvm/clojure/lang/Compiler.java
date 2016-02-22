@@ -6883,7 +6883,7 @@ public class Compiler implements Opcodes {
         if (v.isStale()
             && !Util.equals(v, DEFINING_VAR.get())) {
           RT.errPrintWriter().println("Warning: using stale var: " + v.toString()
-            + String.format(" (var rev: %d, ns rev: %d)", v.getRev(), v.ns.getRev()) + loc);
+                                      + String.format(" (var rev: %d, ns rev: %d)", v.getRev(), v.ns.getRev()) + loc);
         }
 
         PersistentHashSet stales = reachesStaleVars(v);
