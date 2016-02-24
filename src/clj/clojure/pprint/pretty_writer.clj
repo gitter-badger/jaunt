@@ -1,12 +1,12 @@
 ;;; pretty_writer.clj -- part of the pretty printer for Clojure
 
-;   Copyright (c) Rich Hickey. All rights reserved.
-;   The use and distribution terms for this software are covered by the
-;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
-;   By using this software in any fashion, you are agreeing to be bound by
-;   the terms of this license.
-;   You must not remove this notice, or any other, from this software.
+;;    Copyright (c) Rich Hickey. All rights reserved.
+;;    The use and distribution terms for this software are covered by the
+;;    Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;    which can be found in the file epl-v10.html at the root of this distribution.
+;;    By using this software in any fashion, you are agreeing to be bound by
+;;    the terms of this license.
+;;    You must not remove this notice, or any other, from this software.
 
 ;; Author: Tom Faulhaber
 ;; April 3, 2009
@@ -68,17 +68,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defstruct ^{:private true} logical-block
-           :parent :section :start-col :indent
-           :done-nl :intra-block-nl
-           :prefix :per-line-prefix :suffix
-           :logical-block-callback)
+  :parent :section :start-col :indent
+  :done-nl :intra-block-nl
+  :prefix :per-line-prefix :suffix
+  :logical-block-callback)
 
 (defn- ancestor? [parent child]
   (loop [child (:parent child)]
     (cond 
-     (nil? child) false
-     (identical? parent child) true
-     :else (recur (:parent child)))))
+      (nil? child) false
+      (identical? parent child) true
+      :else (recur (:parent child)))))
 
 (defstruct ^{:private true} section :parent)
 
@@ -88,10 +88,10 @@
       (- (:end-pos (last l)) (:start-pos (first l)))
       0)))
 
-; A blob of characters (aka a string)
+;; A blob of characters (aka a string)
 (deftype buffer-blob :data :trailing-white-space :start-pos :end-pos)
 
-; A newline
+;; A newline
 (deftype nl-t :type :logical-block :start-pos :end-pos)
 
 (deftype start-block-t :logical-block :start-pos :end-pos)
@@ -110,8 +110,8 @@
 
 (defmulti ^{:private true} write-token #(:type-tag %2))
 (defmethod write-token :start-block-t [^Writer this token]
-   (when-let [cb (getf :logical-block-callback)] (cb :start))
-   (let [lb (:logical-block token)]
+  (when-let [cb (getf :logical-block-callback)] (cb :start))
+  (let [lb (:logical-block token)]
     (dosync
      (when-let [^String prefix (:prefix lb)] 
        (write-to-base prefix))
@@ -129,8 +129,8 @@
     (ref-set (:indent lb) 
              (+ (:offset token)
                 (condp = (:relative-to token)
-		  :block @(:start-col lb)
-		  :current (get-column (getf :base)))))))
+                  :block @(:start-col lb)
+                  :current (get-column (getf :base)))))))
 
 (defmethod write-token :buffer-blob [^Writer this token]
   (write-to-base ^String (:data token)))
@@ -139,8 +139,8 @@
 ;  (prlabel wt @(:done-nl (:logical-block token)))
 ;  (prlabel wt (:type token) (= (:type token) :mandatory))
   (if (or (= (:type token) :mandatory)
-           (and (not (= (:type token) :fill))
-                @(:done-nl (:logical-block token))))
+          (and (not (= (:type token) :fill))
+               @(:done-nl (:logical-block token))))
     (emit-nl this token)
     (if-let [^String tws (getf :trailing-white-space)]
       (write-to-base tws)))
@@ -150,7 +150,7 @@
   (doseq [token tokens]
     (if-not (= (:type-tag token) :nl-t)
       (if-let [^String tws (getf :trailing-white-space)]
-	(write-to-base tws)))
+        (write-to-base tws)))
     (write-token this token)
     (setf :trailing-white-space (:trailing-white-space token)))
   (let [^String tws (getf :trailing-white-space)] 
@@ -219,7 +219,7 @@
         lb (:logical-block nl)
         section (seq (take-while #(let [nl-lb (:logical-block %)]
                                     (not (and (nl-t? %) (or (= nl-lb lb) (ancestor? nl-lb lb)))))
-                            (next buffer)))]
+                                 (next buffer)))]
     section)) 
 
 (defn- update-nl-state [lb]
@@ -240,7 +240,7 @@
     (if prefix 
       (write-to-base prefix))
     (let [^String istr (apply str (repeat (- @(:indent lb) (count prefix))
-					  \space))] 
+                                          \space))] 
       (write-to-base istr))
     (update-nl-state lb)))
 
@@ -283,13 +283,13 @@
 ;;;                              (prlabel recurse (toks rem2))
                          (if (= rem2 section)
                            (do ; If that didn't produce any output, it has no nls
-                                        ; so we'll force it
+;; so we'll force it
                              (write-tokens this section false)
                              remainder)
                            (into [] (concat rem2 remainder))))
                        result)
 ;;              ff (prlabel wts (toks result))
-              ] 
+]
           result)))))
 
 (defn- write-line [^Writer this]
@@ -301,7 +301,7 @@
        (let [new-buffer (write-token-string this buffer)]
 ;;          (prlabel wl new-buffer)
          (if-not (identical? buffer new-buffer)
-                 (recur new-buffer)))))))
+           (recur new-buffer)))))))
 
 ;;; Add a buffer token to the buffer and see if it's time to start
 ;;; writing
@@ -322,7 +322,7 @@
 
 (defn- write-white-space [^Writer this]
   (when-let [^String tws (getf :trailing-white-space)]
-    ; (prlabel wws (str "*" tws "*"))
+;; (prlabel wws (str "*" tws "*"))
     (write-to-base tws)
     (dosync
      (setf :trailing-white-space nil))))
@@ -355,7 +355,6 @@
          (setf :buffering :writing)
          (last lines))))))
 
-
 (defn- p-write-char [^Writer this ^Integer c]
   (if (= (getf :mode) :writing)
     (do 
@@ -368,7 +367,6 @@
         (dosync
          (setf :pos newpos)
          (add-to-buffer this (make-buffer-blob (str (char c)) nil oldpos newpos)))))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Initialize the pretty-writer instance
@@ -392,47 +390,46 @@
       (deref [] fields)
 
       (write 
-       ([x]
+        ([x]
           ;;     (prlabel write x (getf :mode))
-          (condp = (class x)
-            String 
-            (let [^String s0 (write-initial-lines this x)
-                  ^String s (.replaceFirst s0 "\\s+$" "")
-                  white-space (.substring s0 (count s))
-                  mode (getf :mode)]
-              (dosync
-               (if (= mode :writing)
-                 (do
-                   (write-white-space this)
-                   (write-to-base s)
-                   (setf :trailing-white-space white-space))
-                 (let [oldpos (getf :pos)
-                       newpos (+ oldpos (count s0))]
-                   (setf :pos newpos)
-                   (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
+         (condp = (class x)
+           String 
+           (let [^String s0 (write-initial-lines this x)
+                 ^String s (.replaceFirst s0 "\\s+$" "")
+                 white-space (.substring s0 (count s))
+                 mode (getf :mode)]
+             (dosync
+              (if (= mode :writing)
+                (do
+                  (write-white-space this)
+                  (write-to-base s)
+                  (setf :trailing-white-space white-space))
+                (let [oldpos (getf :pos)
+                      newpos (+ oldpos (count s0))]
+                  (setf :pos newpos)
+                  (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
 
-            Integer
-            (p-write-char this x)
-            Long
-            (p-write-char this x)))
+           Integer
+           (p-write-char this x)
+           Long
+           (p-write-char this x)))
         ([x off len]
-           (.write ^Writer this (subs (str x) off (+ off len)))))
+         (.write ^Writer this (subs (str x) off (+ off len)))))
 
       (ppflush []
-             (if (= (getf :mode) :buffering)
-               (dosync
-                (write-tokens this (getf :buffer) true)
-                (setf :buffer []))
-               (write-white-space this)))
+        (if (= (getf :mode) :buffering)
+          (dosync
+           (write-tokens this (getf :buffer) true)
+           (setf :buffer []))
+          (write-white-space this)))
 
       (flush []
-             (.ppflush ^PrettyFlush this)
-             (let [^Writer w (getf :base)]
-               (.flush w)))
+        (.ppflush ^PrettyFlush this)
+        (let [^Writer w (getf :base)]
+          (.flush w)))
 
       (close []
-             (.flush ^Writer this)))))
-
+        (.flush ^Writer this)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Methods for pretty-writer
@@ -449,8 +446,8 @@
      (if (= (getf :mode) :writing)
        (do
          (write-white-space this)
-          (when-let [cb (getf :logical-block-callback)] (cb :start))
-          (if prefix 
+         (when-let [cb (getf :logical-block-callback)] (cb :start))
+         (if prefix 
            (write-to-base prefix))
          (let [col (get-column (getf :base))]
            (ref-set (:start-col lb) col)
@@ -490,8 +487,8 @@
          (write-white-space this)
          (ref-set (:indent lb) 
                   (+ offset (condp = relative-to
-			      :block @(:start-col lb)
-			      :current (get-column (getf :base))))))
+                              :block @(:start-col lb)
+                              :current (get-column (getf :base))))))
        (let [pos (getf :pos)]
          (add-to-buffer this (make-indent-t lb relative-to offset pos pos)))))))
 

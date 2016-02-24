@@ -1,10 +1,10 @@
-;   Copyright (c) Rich Hickey. All rights reserved.
-;   The use and distribution terms for this software are covered by the
-;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
-;   By using this software in any fashion, you are agreeing to be bound by
-;   the terms of this license.
-;   You must not remove this notice, or any other, from this software.
+;;    Copyright (c) Rich Hickey. All rights reserved.
+;;    The use and distribution terms for this software are covered by the
+;;    Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;    which can be found in the file epl-v10.html at the root of this distribution.
+;;    By using this software in any fashion, you are agreeing to be bound by
+;;    the terms of this license.
+;;    You must not remove this notice, or any other, from this software.
 
 (in-ns 'clojure.core)
 
@@ -132,18 +132,18 @@
 (defn- imap-cons
   [^IPersistentMap this o]
   (cond
-   (map-entry? o)
-     (let [^java.util.Map$Entry pair o]
-       (.assoc this (.getKey pair) (.getValue pair)))
-   (instance? clojure.lang.IPersistentVector o)
-     (let [^clojure.lang.IPersistentVector vec o]
-       (.assoc this (.nth vec 0) (.nth vec 1)))
-   :else (loop [this this
-                o o]
-      (if (seq o)
-        (let [^java.util.Map$Entry pair (first o)]
-          (recur (.assoc this (.getKey pair) (.getValue pair)) (rest o)))
-        this))))
+    (map-entry? o)
+    (let [^java.util.Map$Entry pair o]
+      (.assoc this (.getKey pair) (.getValue pair)))
+    (instance? clojure.lang.IPersistentVector o)
+    (let [^clojure.lang.IPersistentVector vec o]
+      (.assoc this (.nth vec 0) (.nth vec 1)))
+    :else (loop [this this
+                 o o]
+            (if (seq o)
+              (let [^java.util.Map$Entry pair (first o)]
+                (recur (.assoc this (.getKey pair) (.getValue pair)) (rest o)))
+              this))))
 
 (defn- emit-defrecord 
   "Do not use this directly - use defrecord"
@@ -161,92 +161,91 @@
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (IllegalArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))
     (let [gs (gensym)]
-    (letfn 
-     [(irecord [[i m]]
-        [(conj i 'clojure.lang.IRecord)
-         m])
-      (eqhash [[i m]] 
-        [(conj i 'clojure.lang.IHashEq)
-         (conj m
-               `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))
-               `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
-               `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
-      (iobj [[i m]] 
-            [(conj i 'clojure.lang.IObj)
-             (conj m `(meta [this#] ~'__meta)
-                   `(withMeta [this# ~gs] (new ~tagname ~@(replace {'__meta gs} fields))))])
-      (ilookup [[i m]] 
-         [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
-          (conj m `(valAt [this# k#] (.valAt this# k# nil))
-                `(valAt [this# k# else#] 
-                   (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
-                                       base-fields)
-                         (get ~'__extmap k# else#)))
-                `(getLookupThunk [this# k#]
-                   (let [~'gclass (class this#)]              
-                     (case k#
-                           ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
-                               (mapcat 
-                                (fn [fld]
-                                  [(keyword fld)
-                                   `(reify clojure.lang.ILookupThunk
-                                           (get [~'thunk ~'gtarget]
-                                                (if (identical? (class ~'gtarget) ~'gclass)
-                                                  (. ~hinted-target ~(symbol (str "-" fld)))
-                                                  ~'thunk)))])
-                                base-fields))
-                           nil))))])
-      (imap [[i m]] 
-            [(conj i 'clojure.lang.IPersistentMap)
-             (conj m 
-                   `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
-                   `(empty [this#] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
-                   `(cons [this# e#] ((var imap-cons) this# e#))
-                   `(equiv [this# ~gs] 
-                        (boolean 
-                         (or (identical? this# ~gs)
-                             (when (identical? (class this#) (class ~gs))
-                               (let [~gs ~(with-meta gs {:tag tagname})]
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(symbol (str "-" fld))))) base-fields)
-                                       (= ~'__extmap (. ~gs ~'__extmap))))))))
-                   `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
-                   `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
+      (letfn 
+       [(irecord [[i m]]
+          [(conj i 'clojure.lang.IRecord)
+           m])
+        (eqhash [[i m]] 
+                [(conj i 'clojure.lang.IHashEq)
+                 (conj m
+                       `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))
+                       `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
+                       `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
+        (iobj [[i m]] 
+              [(conj i 'clojure.lang.IObj)
+               (conj m `(meta [this#] ~'__meta)
+                     `(withMeta [this# ~gs] (new ~tagname ~@(replace {'__meta gs} fields))))])
+        (ilookup [[i m]] 
+                 [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
+                  (conj m `(valAt [this# k#] (.valAt this# k# nil))
+                        `(valAt [this# k# else#] 
+                                (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
+                                                   base-fields)
+                                      (get ~'__extmap k# else#)))
+                        `(getLookupThunk [this# k#]
+                                         (let [~'gclass (class this#)]              
+                                           (case k#
+                                             ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
+                                                 (mapcat 
+                                                  (fn [fld]
+                                                    [(keyword fld)
+                                                     `(reify clojure.lang.ILookupThunk
+                                                        (get [~'thunk ~'gtarget]
+                                                          (if (identical? (class ~'gtarget) ~'gclass)
+                                                            (. ~hinted-target ~(symbol (str "-" fld)))
+                                                            ~'thunk)))])
+                                                  base-fields))
+                                             nil))))])
+        (imap [[i m]] 
+              [(conj i 'clojure.lang.IPersistentMap)
+               (conj m 
+                     `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
+                     `(empty [this#] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
+                     `(cons [this# e#] ((var imap-cons) this# e#))
+                     `(equiv [this# ~gs] 
+                             (boolean 
+                              (or (identical? this# ~gs)
+                                  (when (identical? (class this#) (class ~gs))
+                                    (let [~gs ~(with-meta gs {:tag tagname})]
+                                      (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(symbol (str "-" fld))))) base-fields)
+                                            (= ~'__extmap (. ~gs ~'__extmap))))))))
+                     `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
+                     `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
                                               (clojure.lang.MapEntry/create k# v#))))
-                   `(seq [this#] (seq (concat [~@(map #(list `clojure.lang.MapEntry/create (keyword %) %) base-fields)]
-                                              ~'__extmap)))
-                   `(iterator [~gs]
-                        (clojure.lang.RecordIterator. ~gs [~@(map keyword base-fields)] (RT/iter ~'__extmap)))
-                   `(assoc [this# k# ~gs]
-                     (condp identical? k#
-                       ~@(mapcat (fn [fld]
-                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])
-                                 base-fields)
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
-                   `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
+                     `(seq [this#] (seq (concat [~@(map #(list `clojure.lang.MapEntry/create (keyword %) %) base-fields)]
+                                                ~'__extmap)))
+                     `(iterator [~gs]
+                                (clojure.lang.RecordIterator. ~gs [~@(map keyword base-fields)] (RT/iter ~'__extmap)))
+                     `(assoc [this# k# ~gs]
+                             (condp identical? k#
+                               ~@(mapcat (fn [fld]
+                                           [(keyword fld) (list* `new tagname (replace {fld gs} fields))])
+                                         base-fields)
+                               (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
+                     `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                             (dissoc (with-meta (into {} this#) ~'__meta) k#)
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
                                                  (not-empty (dissoc ~'__extmap k#))))))])
-      (ijavamap [[i m]]
-                [(conj i 'java.util.Map 'java.io.Serializable)
-                 (conj m
-                       `(size [this#] (.count this#))
-                       `(isEmpty [this#] (= 0 (.count this#)))
-                       `(containsValue [this# v#] (boolean (some #{v#} (vals this#))))
-                       `(get [this# k#] (.valAt this# k#))
-                       `(put [this# k# v#] (throw (UnsupportedOperationException.)))
-                       `(remove [this# k#] (throw (UnsupportedOperationException.)))
-                       `(putAll [this# m#] (throw (UnsupportedOperationException.)))
-                       `(clear [this#] (throw (UnsupportedOperationException.)))
-                       `(keySet [this#] (set (keys this#)))
-                       `(values [this#] (vals this#))
-                       `(entrySet [this#] (set this#)))])
-      ]
-     (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
-       `(deftype* ~(symbol (name *ns*) (name tagname)) ~classname ~(conj hinted-fields '__meta '__extmap)
-          :implements ~(vec i) 
-          ~@(mapcat identity opts)
-          ~@m))))))
+        (ijavamap [[i m]]
+                  [(conj i 'java.util.Map 'java.io.Serializable)
+                   (conj m
+                         `(size [this#] (.count this#))
+                         `(isEmpty [this#] (= 0 (.count this#)))
+                         `(containsValue [this# v#] (boolean (some #{v#} (vals this#))))
+                         `(get [this# k#] (.valAt this# k#))
+                         `(put [this# k# v#] (throw (UnsupportedOperationException.)))
+                         `(remove [this# k#] (throw (UnsupportedOperationException.)))
+                         `(putAll [this# m#] (throw (UnsupportedOperationException.)))
+                         `(clear [this#] (throw (UnsupportedOperationException.)))
+                         `(keySet [this#] (set (keys this#)))
+                         `(values [this#] (vals this#))
+                         `(entrySet [this#] (set this#)))])]
+        (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
+          `(deftype* ~(symbol (name *ns*) (name tagname)) ~classname ~(conj hinted-fields '__meta '__extmap)
+             :implements ~(vec i) 
+             ~@(mapcat identity opts)
+             ~@m))))))
 
 (defn- build-positional-factory
   "Used to build a positional factory for a given type/record.  Because of the
@@ -515,7 +514,7 @@
   ([] nil)
   ([a] a) 
   ([^Class a ^Class b]
-     (if (.isAssignableFrom a b) b a)))
+   (if (.isAssignableFrom a b) b a)))
 
 (defn find-protocol-impl [protocol x]
   (if (instance? (:on-interface protocol) x)
@@ -581,7 +580,7 @@
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
-                          (. ~(with-meta target {:tag on-interface}) (~(or on-method method) ~@(rest gargs))))))
+                        (. ~(with-meta target {:tag on-interface}) (~(or on-method method) ~@(rest gargs))))))
                   arglists))
              ^clojure.lang.AFunction f#
              (fn ~gthis
@@ -590,11 +589,11 @@
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
-                          (let [cache# (.__methodImplCache ~gthis)
-                                f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
-                            (if f# 
-                              (f# ~@gargs)
-                              ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs))))))
+                        (let [cache# (.__methodImplCache ~gthis)
+                              f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
+                          (if f# 
+                            (f# ~@gargs)
+                            ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
@@ -644,35 +643,35 @@
                         {} sigs))
         meths (mapcat (fn [sig]
                         (let [m (munge (:name sig))]
-                          (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object) 
+                          (map #(vector m (vec (repeat (dec (count %)) 'Object)) 'Object) 
                                (:arglists sig))))
                       (vals sigs))]
-  `(do
-     (defonce ~name {})
-     (gen-interface :name ~iname :methods ~meths)
-     (alter-meta! (var ~name) assoc :doc ~(:doc opts))
-     ~(when sigs
-        `(#'assert-same-protocol (var ~name) '~(map :name (vals sigs))))
-     (alter-var-root (var ~name) merge 
-                     (assoc ~opts 
-                       :sigs '~sigs 
-                       :var (var ~name)
-                       :method-map 
-                         ~(and (:on opts)
-                               (apply hash-map 
+    `(do
+       (defonce ~name {})
+       (gen-interface :name ~iname :methods ~meths)
+       (alter-meta! (var ~name) assoc :doc ~(:doc opts))
+       ~(when sigs
+          `(#'assert-same-protocol (var ~name) '~(map :name (vals sigs))))
+       (alter-var-root (var ~name) merge 
+                       (assoc ~opts 
+                              :sigs '~sigs 
+                              :var (var ~name)
+                              :method-map 
+                              ~(and (:on opts)
+                                    (apply hash-map 
+                                           (mapcat 
+                                            (fn [s] 
+                                              [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
+                                            (vals sigs))))
+                              :method-builders 
+                              ~(apply hash-map 
                                       (mapcat 
-                                       (fn [s] 
-                                         [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
-                                       (vals sigs))))
-                       :method-builders 
-                        ~(apply hash-map 
-                                (mapcat 
-                                 (fn [s]
-                                   [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
-                                    (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
-                                 (vals sigs)))))
-     (-reset-methods ~name)
-     '~name)))
+                                       (fn [s]
+                                         [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
+                                          (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
+                                       (vals sigs)))))
+       (-reset-methods ~name)
+       '~name)))
 
 (defmacro defprotocol 
   "A protocol is a named set of named methods and their signatures:
@@ -782,8 +781,8 @@
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
                (let [specs (if (vector? (first specs)) 
-                                        (list specs) 
-                                        specs)]
+                             (list specs) 
+                             specs)]
                  (map (fn [[[target & args] & body]]
                         (cons (apply vector (vary-meta target assoc :tag c) args)
                               body))
@@ -794,7 +793,7 @@
 (defn- emit-extend-type [c specs]
   (let [impls (parse-impls specs)]
     `(extend ~c
-             ~@(mapcat (partial emit-hinted-impl c) impls))))
+       ~@(mapcat (partial emit-hinted-impl c) impls))))
 
 (defmacro extend-type 
   "A macro that expands into an extend call. Useful when you are

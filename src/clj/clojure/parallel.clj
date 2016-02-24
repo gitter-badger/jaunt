@@ -1,14 +1,14 @@
-;   Copyright (c) Rich Hickey. All rights reserved.
-;   The use and distribution terms for this software are covered by the
-;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
-;   By using this software in any fashion, you are agreeing to be bound by
-;   the terms of this license.
-;   You must not remove this notice, or any other, from this software.
+;;    Copyright (c) Rich Hickey. All rights reserved.
+;;    The use and distribution terms for this software are covered by the
+;;    Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;    which can be found in the file epl-v10.html at the root of this distribution.
+;;    By using this software in any fashion, you are agreeing to be bound by
+;;    the terms of this license.
+;;    You must not remove this notice, or any other, from this software.
 
 (ns ^{:doc "DEPRECATED Wrapper of the ForkJoin library (JSR-166)."
-       :author "Rich Hickey"}
-    clojure.parallel)
+      :author "Rich Hickey"}
+ clojure.parallel)
 (alias 'parallel 'clojure.parallel)
 
 (comment "
@@ -115,24 +115,24 @@ pvec.
   elements of the 2 collections."
 
   ([coll] 
-     (if (instance? ParallelArrayWithMapping coll)
-       coll
-       (. ParallelArray createUsingHandoff  
+   (if (instance? ParallelArrayWithMapping coll)
+     coll
+     (. ParallelArray createUsingHandoff  
         (to-array coll) 
         (. ParallelArray defaultExecutor))))
   ([coll & ops]
-     (reduce (fn [pa [op args]] 
-                 (cond
-                  (= op :bound) (. pa withBounds (args 0) (args 1))
-                  (= op :filter) (. pa withFilter (predicate args))
-                  (= op :filter-with) (. pa withFilter (binary-predicate (args 0)) (par (args 1)))
-                  (= op :filter-index) (. pa withIndexedFilter (int-and-object-predicate args))
-                  (= op :map) (. pa withMapping (parallel/op args))
-                  (= op :map-with) (. pa withMapping (binary-op (args 0)) (par (args 1)))
-                  (= op :map-index) (. pa withIndexedMapping (int-and-object-to-object args))
-                  :else (throw (Exception. (str "Unsupported par op: " op)))))
-             (par coll) 
-             (partition 2 ops))))
+   (reduce (fn [pa [op args]] 
+             (cond
+               (= op :bound) (. pa withBounds (args 0) (args 1))
+               (= op :filter) (. pa withFilter (predicate args))
+               (= op :filter-with) (. pa withFilter (binary-predicate (args 0)) (par (args 1)))
+               (= op :filter-index) (. pa withIndexedFilter (int-and-object-predicate args))
+               (= op :map) (. pa withMapping (parallel/op args))
+               (= op :map-with) (. pa withMapping (binary-op (args 0)) (par (args 1)))
+               (= op :map-index) (. pa withIndexedMapping (int-and-object-to-object args))
+               :else (throw (Exception. (str "Unsupported par op: " op)))))
+           (par coll) 
+           (partition 2 ops))))
 
 ;;;;;;;;;;;;;;;;;;;;; aggregate operations ;;;;;;;;;;;;;;;;;;;;;;
 (defn pany
@@ -212,39 +212,37 @@ pvec.
   [coll]
   (pa-to-vec (. (pall coll) removeConsecutiveDuplicates)))
 
-
 (comment
-(load-file "src/parallel.clj")
-(refer 'parallel)
-(pdistinct [1 2 3 2 1])
+  (load-file "src/parallel.clj")
+  (refer 'parallel)
+  (pdistinct [1 2 3 2 1])
 ;(pcumulate [1 2 3 2 1] + 0) ;broken, not exposed
-(def a (make-array Object 1000000))
-(dotimes i (count a)
-  (aset a i (rand-int i)))
-(time (reduce + 0 a))
-(time (preduce + 0 a))
-(time (count (distinct a)))
-(time (count (pdistinct a)))
+  (def a (make-array Object 1000000))
+  (dotimes i (count a)
+           (aset a i (rand-int i)))
+  (time (reduce + 0 a))
+  (time (preduce + 0 a))
+  (time (count (distinct a)))
+  (time (count (pdistinct a)))
 
-(preduce + 0 [1 2 3 2 1])
-(preduce + 0 (psort a))
-(pvec (par [11 2 3 2] :filter-index (fn [x i] (> i x))))
-(pvec (par [11 2 3 2] :filter-with [(fn [x y] (> y x)) [110 2 33 2]]))
+  (preduce + 0 [1 2 3 2 1])
+  (preduce + 0 (psort a))
+  (pvec (par [11 2 3 2] :filter-index (fn [x i] (> i x))))
+  (pvec (par [11 2 3 2] :filter-with [(fn [x y] (> y x)) [110 2 33 2]]))
 
-(psummary ;or pvec/pmax etc
- (par [11 2 3 2] 
-      :filter-with [(fn [x y] (> y x)) 
-                    [110 2 33 2]]
-      :map #(* % 2)))
+  (psummary ;or pvec/pmax etc
+   (par [11 2 3 2] 
+        :filter-with [(fn [x y] (> y x)) 
+                      [110 2 33 2]]
+        :map #(* % 2)))
 
-(preduce + 0
-  (par [11 2 3 2] 
-       :filter-with [< [110 2 33 2]]))
+  (preduce + 0
+           (par [11 2 3 2] 
+                :filter-with [< [110 2 33 2]]))
 
-(time (reduce + 0 (map #(* % %) (range 1000000))))
-(time (preduce + 0 (par (range 1000000) :map-index *)))
-(def v (range 1000000))
-(time (preduce + 0 (par v :map-index *)))
-(time (preduce + 0 (par v :map  #(* % %))))
-(time (reduce + 0 (map #(* % %) v)))
-)
+  (time (reduce + 0 (map #(* % %) (range 1000000))))
+  (time (preduce + 0 (par (range 1000000) :map-index *)))
+  (def v (range 1000000))
+  (time (preduce + 0 (par v :map-index *)))
+  (time (preduce + 0 (par v :map  #(* % %))))
+  (time (reduce + 0 (map #(* % %) v))))

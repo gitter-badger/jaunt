@@ -1,19 +1,18 @@
-;   Copyright (c) Rich Hickey. All rights reserved.
-;   The use and distribution terms for this software are covered by the
-;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
-;   By using this software in any fashion, you are agreeing to be bound by
-;   the terms of this license.
-;   You must not remove this notice, or any other, from this software.
+;;    Copyright (c) Rich Hickey. All rights reserved.
+;;    The use and distribution terms for this software are covered by the
+;;    Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;    which can be found in the file epl-v10.html at the root of this distribution.
+;;    By using this software in any fashion, you are agreeing to be bound by
+;;    the terms of this license.
+;;    You must not remove this notice, or any other, from this software.
 
-; Author: Frantisek Sodomka
+;; Author: Frantisek Sodomka
 
 ;;
 ;;  Created 1/28/2009
 
 (ns clojure.test-clojure.predicates
   (:use clojure.test))
-
 
 ;; *** Type predicates ***
 
@@ -118,24 +117,22 @@
    ns?       [:ns]
    })
 
-
 ;; Test all type predicates against all data types
 ;;
 (defn- get-fn-name [f]
   (str
-    (apply str (nthnext (first (.split (str f) "_"))
-                        (count "clojure.core$")))
-    "?"))
+   (apply str (nthnext (first (.split (str f) "_"))
+                       (count "clojure.core$")))
+   "?"))
 
 (deftest test-type-preds
   (doseq [tp type-preds]
     (doseq [dt sample-data]
       (if (some #(= % (first dt)) (second tp))
         (is ((first tp) (second dt))
-          (pr-str (list (get-fn-name (first tp)) (second dt))))
+            (pr-str (list (get-fn-name (first tp)) (second dt))))
         (is (not ((first tp) (second dt)))
-          (pr-str (list 'not (list (get-fn-name (first tp)) (second dt)))))))))
-
+            (pr-str (list 'not (list (get-fn-name (first tp)) (second dt)))))))))
 
 ;; Additional tests:
 ;; http://groups.google.com/group/clojure/browse_thread/thread/537761a06edb4b06/bfd4f0705b746a38

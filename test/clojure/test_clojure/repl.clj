@@ -43,7 +43,6 @@
     (is (some #{'clojure.core/defmacro} (apropos 'efmac)))
     (is (= [] (apropos 'nothing-has-this-name)))))
 
-
 (defmacro call-ns 
   "Call ns with a unique namespace name. Return the result of calling ns"
   []  `(ns a#))
@@ -53,6 +52,6 @@
 
 (deftest test-dynamic-ns
   (testing "a call to ns returns nil"
-   (is (= nil (call-ns))))
+    (is (= nil (call-ns))))
   (testing "requiring a dynamically created ns should not throw an exception"
     (is (= nil (let [a (call-ns-sym)] (require a))))))

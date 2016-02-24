@@ -1,12 +1,12 @@
 ;;; pprint_base.clj -- part of the pretty printer for Clojure
 
-;   Copyright (c) Rich Hickey. All rights reserved.
-;   The use and distribution terms for this software are covered by the
-;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
-;   By using this software in any fashion, you are agreeing to be bound by
-;   the terms of this license.
-;   You must not remove this notice, or any other, from this software.
+;;    Copyright (c) Rich Hickey. All rights reserved.
+;;    The use and distribution terms for this software are covered by the
+;;    Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;    which can be found in the file epl-v10.html at the root of this distribution.
+;;    By using this software in any fashion, you are agreeing to be bound by
+;;    the terms of this license.
+;;    You must not remove this notice, or any other, from this software.
 
 ;; Author: Tom Faulhaber
 ;; April 3, 2009
@@ -28,77 +28,75 @@
 
 
 (def ^:dynamic
- ^{:doc "Bind to true if you want write to use pretty printing", :added "1.2"}
- *print-pretty* true)
+  ^{:doc "Bind to true if you want write to use pretty printing", :added "1.2"}
+  *print-pretty* true)
 
 (defonce ^:dynamic ; If folks have added stuff here, don't overwrite
- ^{:doc "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
+  ^{:doc "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
 to modify.",
-   :added "1.2"}
- *print-pprint-dispatch* nil)
+    :added "1.2"}
+  *print-pprint-dispatch* nil)
 
 (def ^:dynamic
- ^{:doc "Pretty printing will try to avoid anything going beyond this column.
+  ^{:doc "Pretty printing will try to avoid anything going beyond this column.
 Set it to nil to have pprint let the line be arbitrarily long. This will ignore all 
 non-mandatory newlines.",
-   :added "1.2"}
- *print-right-margin* 72)
+    :added "1.2"}
+  *print-right-margin* 72)
 
 (def ^:dynamic
- ^{:doc "The column at which to enter miser style. Depending on the dispatch table, 
+  ^{:doc "The column at which to enter miser style. Depending on the dispatch table, 
 miser style add newlines in more places to try to keep lines short allowing for further 
 levels of nesting.",
-   :added "1.2"}
- *print-miser-width* 40)
+    :added "1.2"}
+  *print-miser-width* 40)
 
 ;;; TODO implement output limiting
 (def ^:dynamic
- ^{:private true,
-   :doc "Maximum number of lines to print in a pretty print instance (N.B. This is not yet used)"}
- *print-lines* nil)
+  ^{:private true,
+    :doc "Maximum number of lines to print in a pretty print instance (N.B. This is not yet used)"}
+  *print-lines* nil)
 
 ;;; TODO: implement circle and shared
 (def ^:dynamic
- ^{:private true,
-   :doc "Mark circular structures (N.B. This is not yet used)"}
- *print-circle* nil)
+  ^{:private true,
+    :doc "Mark circular structures (N.B. This is not yet used)"}
+  *print-circle* nil)
 
 ;;; TODO: should we just use *print-dup* here?
 (def ^:dynamic
- ^{:private true,
-   :doc "Mark repeated structures rather than repeat them (N.B. This is not yet used)"}
- *print-shared* nil)
+  ^{:private true,
+    :doc "Mark repeated structures rather than repeat them (N.B. This is not yet used)"}
+  *print-shared* nil)
 
 (def ^:dynamic
- ^{:doc "Don't print namespaces with symbols. This is particularly useful when 
+  ^{:doc "Don't print namespaces with symbols. This is particularly useful when 
 pretty printing the results of macro expansions"
-   :added "1.2"}
- *print-suppress-namespaces* nil)
+    :added "1.2"}
+  *print-suppress-namespaces* nil)
 
 ;;; TODO: support print-base and print-radix in cl-format
 ;;; TODO: support print-base and print-radix in rationals
 (def ^:dynamic
- ^{:doc "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
+  ^{:doc "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
 or 16, then the radix specifier used is #b, #o, or #x, respectively. Otherwise the 
 radix specifier is in the form #XXr where XX is the decimal value of *print-base* "
-   :added "1.2"}
- *print-radix* nil)
+    :added "1.2"}
+  *print-radix* nil)
 
 (def ^:dynamic
- ^{:doc "The base to use for printing integers and rationals."
-   :added "1.2"}
- *print-base* 10)
-
-
+  ^{:doc "The base to use for printing integers and rationals."
+    :added "1.2"}
+  *print-base* 10)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Internal variables that keep track of where we are in the 
 ;; structure
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def  ^:dynamic ^{ :private true } *current-level* 0)
+(def  ^:dynamic ^{:private true} *current-level* 0)
 
-(def ^:dynamic ^{ :private true } *current-length* nil)
+(def ^:dynamic ^{:private true} *current-length* nil)
 
 ;; TODO: add variables for length, lines.
 
@@ -116,32 +114,31 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
     (orig-pr x)))
 
 (def ^{:private true} write-option-table
-     {;:array            *print-array*
-      :base             'clojure.pprint/*print-base*,
+  {;:array            *print-array*
+   :base             'clojure.pprint/*print-base*,
       ;;:case             *print-case*,
-      :circle           'clojure.pprint/*print-circle*,
+   :circle           'clojure.pprint/*print-circle*,
       ;;:escape           *print-escape*,
       ;;:gensym           *print-gensym*,
-      :length           'clojure.core/*print-length*,
-      :level            'clojure.core/*print-level*,
-      :lines            'clojure.pprint/*print-lines*,
-      :miser-width      'clojure.pprint/*print-miser-width*,
-      :dispatch         'clojure.pprint/*print-pprint-dispatch*,
-      :pretty           'clojure.pprint/*print-pretty*,
-      :radix            'clojure.pprint/*print-radix*,
-      :readably         'clojure.core/*print-readably*,
-      :right-margin     'clojure.pprint/*print-right-margin*,
-      :suppress-namespaces 'clojure.pprint/*print-suppress-namespaces*})
-
+   :length           'clojure.core/*print-length*,
+   :level            'clojure.core/*print-level*,
+   :lines            'clojure.pprint/*print-lines*,
+   :miser-width      'clojure.pprint/*print-miser-width*,
+   :dispatch         'clojure.pprint/*print-pprint-dispatch*,
+   :pretty           'clojure.pprint/*print-pretty*,
+   :radix            'clojure.pprint/*print-radix*,
+   :readably         'clojure.core/*print-readably*,
+   :right-margin     'clojure.pprint/*print-right-margin*,
+   :suppress-namespaces 'clojure.pprint/*print-suppress-namespaces*})
 
 (defmacro ^{:private true} binding-map [amap & body]
   (let []
     `(do
        (. clojure.lang.Var (pushThreadBindings ~amap))
        (try
-        ~@body
-        (finally
-         (. clojure.lang.Var (popThreadBindings)))))))
+         ~@body
+         (finally
+           (. clojure.lang.Var (popThreadBindings)))))))
 
 (defn- table-ize [t m] 
   (apply hash-map (mapcat 
@@ -161,11 +158,10 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
   `(let [base-writer# ~base-writer
          new-writer# (not (pretty-writer? base-writer#))]
      (binding [*out* (if new-writer#
-                      (make-pretty-writer base-writer# *print-right-margin* *print-miser-width*)
-                      base-writer#)]
+                       (make-pretty-writer base-writer# *print-right-margin* *print-miser-width*)
+                       base-writer#)]
        ~@body
        (.ppflush ^PrettyFlush *out*))))
-
 
 ;;;TODO: if pretty print is not set, don't use pr but rather something that respects *print-base*, etc.
 (defn write-out 
@@ -221,22 +217,21 @@ The following keyword arguments can be passed with values:
   [object & kw-args]
   (let [options (merge {:stream true} (apply hash-map kw-args))]
     (binding-map (table-ize write-option-table options) 
-      (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
-        (let [optval (if (contains? options :stream) 
-                       (:stream options)
-                       true) 
-              base-writer (condp = optval
-                            nil (java.io.StringWriter.)
-                            true *out*
-                            optval)]
-          (if *print-pretty*
-            (with-pretty-writer base-writer
-              (write-out object))
-            (binding [*out* base-writer]
-              (pr object)))
-          (if (nil? optval) 
-            (.toString ^java.io.StringWriter base-writer)))))))
-
+                 (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
+                              (let [optval (if (contains? options :stream) 
+                                             (:stream options)
+                                             true) 
+                                    base-writer (condp = optval
+                                                  nil (java.io.StringWriter.)
+                                                  true *out*
+                                                  optval)]
+                                (if *print-pretty*
+                                  (with-pretty-writer base-writer
+                                    (write-out object))
+                                  (binding [*out* base-writer]
+                                    (pr object)))
+                                (if (nil? optval) 
+                                  (.toString ^java.io.StringWriter base-writer)))))))
 
 (defn pprint 
   "Pretty print object to the optional output writer. If the writer is not provided, 
@@ -244,12 +239,12 @@ print the object to the currently bound value of *out*."
   {:added "1.2"}
   ([object] (pprint object *out*)) 
   ([object writer]
-     (with-pretty-writer writer
-       (binding [*print-pretty* true]
-         (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
-           (write-out object)))
-       (if (not (= 0 (get-column *out*)))
-         (prn)))))
+   (with-pretty-writer writer
+     (binding [*print-pretty* true]
+       (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {}) 
+                    (write-out object)))
+     (if (not (= 0 (get-column *out*)))
+       (prn)))))
 
 (defmacro pp 
   "A convenience macro that pretty prints the last thing output. This is
@@ -291,10 +286,10 @@ clojure.pprint.dispatch.clj."
 
 (defn- check-enumerated-arg [arg choices]
   (if-not (choices arg)
-          (throw
-           (IllegalArgumentException.
+    (throw
+     (IllegalArgumentException.
             ;; TODO clean up choices string
-            (str "Bad argument: " arg ". It must be one of " choices)))))
+      (str "Bad argument: " arg ". It must be one of " choices)))))
 
 (defn- level-exceeded []
   (and *print-level* (>= *current-level* *print-level*)))
@@ -318,12 +313,12 @@ and :suffix."
                                     (inc (var-get #'clojure.pprint/*current-level*))
                                     #'clojure.pprint/*current-length* 0})
              (try  
-              (#'clojure.pprint/start-block *out*
-                           ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
-              ~@body
-              (#'clojure.pprint/end-block *out*)
-              (finally 
-               (pop-thread-bindings)))))
+               (#'clojure.pprint/start-block *out*
+                                             ~(:prefix options) ~(:per-line-prefix options) ~(:suffix options))
+               ~@body
+               (#'clojure.pprint/end-block *out*)
+               (finally 
+                 (pop-thread-bindings)))))
          nil)))
 
 (defn pprint-newline
@@ -370,7 +365,6 @@ THIS FUNCTION IS NOT YET IMPLEMENTED."
   (check-enumerated-arg kind #{:line :section :line-relative :section-relative})
   (throw (UnsupportedOperationException. "pprint-tab is not yet implemented")))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Helpers for dispatch function writing
@@ -379,13 +373,13 @@ THIS FUNCTION IS NOT YET IMPLEMENTED."
 
 (defn- pll-mod-body [var-sym body]
   (letfn [(inner [form]
-                 (if (seq? form)
-                   (let [form (macroexpand form)] 
-                     (condp = (first form)
-                       'loop* form
-                       'recur (concat `(recur (inc ~var-sym)) (rest form))
-                       (walk inner identity form)))
-                   form))]
+            (if (seq? form)
+              (let [form (macroexpand form)] 
+                (condp = (first form)
+                  'loop* form
+                  'recur (concat `(recur (inc ~var-sym)) (rest form))
+                  (walk inner identity form)))
+              form))]
     (walk inner identity body)))
 
 (defmacro print-length-loop
