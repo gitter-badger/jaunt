@@ -1,6 +1,8 @@
 machine:
   java:
     version: oraclejdk8
+  environment:
+    _JAVA_OPTIONS: -Xmx2g
 
 dependencies:
   cache_directories:
@@ -14,6 +16,9 @@ dependencies:
 test:
   pre:
     - bash check-whitespace.sh
+    - lein cljfmt check
+  override:
+    - mvn integration-test
 
 deployment:
   staging:
