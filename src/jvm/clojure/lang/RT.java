@@ -411,14 +411,22 @@ public class RT {
     return arglist;
   }
 
-// duck typing stderr plays nice with e.g. swank
-  public static PrintWriter errPrintWriter() {
-    Writer w = (Writer) ERR.deref();
+  // duck typing stderr plays nice with e.g. swank
+  static PrintWriter makePrintWriter(Var v) {
+    Writer w = (Writer) v.deref();
     if (w instanceof PrintWriter) {
       return (PrintWriter) w;
     } else {
       return new PrintWriter(w);
     }
+  }
+
+  public static PrintWriter errPrintWriter() {
+    return makePrintWriter(ERR);
+  }
+
+  public static PrintWriter outPrintWriter() {
+    return makePrintWriter(OUT);
   }
 
   public static String getPos() {
