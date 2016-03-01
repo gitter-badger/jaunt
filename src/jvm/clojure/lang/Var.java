@@ -50,12 +50,9 @@ public final class Var
     final static Frame TOP = new Frame(PersistentHashMap.EMPTY, null);
     //Var->TBox
     Associative bindings;
-    //Var->val
-//  Associative frameBindings;
     Frame prev;
 
     public Frame(Associative bindings, Frame prev) {
-//    this.frameBindings = frameBindings;
       this.bindings = bindings;
       this.prev = prev;
     }
@@ -66,7 +63,6 @@ public final class Var
   }
 
   static final ThreadLocal<Frame> dvals = new ThreadLocal<Frame>() {
-
     protected Frame initialValue() {
       return Frame.TOP;
     }
