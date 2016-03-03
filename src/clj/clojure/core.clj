@@ -4052,12 +4052,12 @@
   "If passed a namespace, returns it. Else, when passed a symbol,
   returns the namespace named by it, throwing an exception if not
   found."
-  {:added "1.0"
+  {:added  "1.0"
    :static true}
   ^clojure.lang.Namespace [x]
-  (if (ns? x) x
-    (or (find-ns x)
-        (throw (Exception. (str "No namespace: " x " found"))))))
+  (or (when (ns? x) x)
+      (find-ns x)
+      (throw (Exception. (str "No namespace: " x " found")))))
 
 (defn ns-name
   "Returns the name of the namespace, a symbol."

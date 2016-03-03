@@ -19,8 +19,7 @@
 (def myvar 42)
 
 (def sample-data
-  {
-   :nil            nil
+  {:nil            nil
 
    :bool-true      true
    :bool-false     false
@@ -65,13 +64,10 @@
 
    :var            (var myvar)
    :delay          (delay (+ 1 2))
-   :ns             (the-ns 'clojure.core)
-   })
-
+   :ns             (the-ns 'clojure.core)})
 
 (def type-preds
-  {
-   nil?      [:nil]
+  {nil?      [:nil]
 
    true?     [:bool-true]
    false?    [:bool-false]
@@ -114,8 +110,7 @@
    class?    [:class]
    var?      [:var]
    delay?    [:delay]
-   ns?       [:ns]
-   })
+   ns?       [:ns]})
 
 ;; Test all type predicates against all data types
 ;;
