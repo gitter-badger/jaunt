@@ -65,6 +65,13 @@ participating, you are expected to uphold this code.  Please report unacceptable
 [me+jaunt+coc@arrdem.com](mailto:me+jaunt+coc@arrdem.com). See [CONTRIBUTING.md](CONTRIBUTING.md)
 for more information about this project's development process.
 
+### Donations
+
+You can support the development of Jaunt and related tooling via
+[Patreon](https://www.patreon.com/arrdem). Note that choosing to contribute represents blanket
+support for this and other projects, and does not constitute a contract for support or
+[for a tee shirt](https://groups.google.com/forum/#!msg/seajure/GLqhj_2915A/E0crn6zHLi0J).
+
 ## Legal
 
 Jaunt is (c) Reid McKenzie. All rights reserved. The use and distribution terms for this software
