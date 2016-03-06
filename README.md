@@ -7,6 +7,8 @@ Branch | Status
 `master` | [![Circle CI](https://circleci.com/gh/jaunt-lang/jaunt/tree/master.svg?style=svg)](https://circleci.com/gh/jaunt-lang/jaunt/tree/master) |
 `develop` | [![Circle CI](https://circleci.com/gh/jaunt-lang/jaunt/tree/develop.svg?style=svg)](https://circleci.com/gh/jaunt-lang/jaunt/tree/develop)
 
+[![Clojars Project](https://img.shields.io/clojars/v/org.jaunt-lang/jaunt.svg)](https://clojars.org/org.jaunt-lang/jaunt)
+
 > The reasonable man adapts himself to the world: the unreasonable one
 > persists in trying to adapt the world to himself. Therefore all
 > progress depends on the unreasonable man.
